@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opening Wi-Fi packages…</title>
+</head>
+<body>
+  <p>Opening the Wi-Fi payment page…</p>
+  <form id="portal" action="http://192.168.88.253:8000/" method="get">
+    <input type="hidden" name="login_url" value="$(link-login-only)">
+    <input type="hidden" name="dst" value="$(link-orig-esc)">
+    <input type="hidden" name="mac" value="$(mac-esc)">
+    <button type="submit">Continue to Wi-Fi packages</button>
+  </form>
+  <script>document.getElementById("portal").submit();</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101815">
+  <title>GATWY Wi-Fi · Buy a package</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body data-payments-enabled="{{ payments_enabled|yesno:'true,false' }}">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="GATWY home">
+        <img class="brand-mark" src="{% static 'images/gatwy-mark.svg' %}" alt="">
+        <span>GATWY<span class="brand-dot">.</span></span>
+      </a>
+      <div class="topbar-right">
+        <span class="online-indicator"><span></span> Network online</span>
+        <a class="help-link" href="tel:{{ support_phone }}">Need help?</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> FAST, SIMPLE WI-FI</div>
+          <h1>Good internet.<br><span>On your terms.</span></h1>
+          <p>Pick a package, pay securely with M-Pesa, and get online in moments.</p>
+          <div class="hero-meta">
+            <span class="meta-icon">↗</span>
+            <span>Instant access after payment</span>
+            <span class="meta-divider"></span>
+            <span>Up to 5 Mbps per device</span>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="signal signal-a"></div><div class="signal signal-b"></div><div class="signal signal-c"></div>
+          <div class="art-core"><span class="core-wifi">⌁</span><span class="core-label">YOU'RE<br>CONNECTED</span></div>
+          <span class="art-spark spark-a">✳</span><span class="art-spark spark-b">✦</span>
+          <span class="art-caption">GOOD THINGS<br>ARE LOADING</span>
+        </div>
+      </section>
+
+      <section class="purchase-layout purchase-layout-single" aria-labelledby="packages-title">
+        <div class="packages-column">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow dark"><span class="eyebrow-line"></span> CHOOSE YOUR ACCESS</div>
+              <h2 id="packages-title">Find your package.</h2>
+            </div>
+            <span class="secure-note"><span class="lock-icon">▣</span> Secure M-Pesa payment</span>
+          </div>
+          <div id="plans" class="plan-grid" aria-live="polite">
+            {% for plan in portal_plans %}
+            <button class="plan-card" type="button" aria-pressed="false">
+              <span class="plan-duration">{{ plan.name }}</span>
+              <span class="plan-price">KSh {{ plan.price_kes }}</span>
+              <span class="plan-devices">{{ plan.device_count }} device{{ plan.device_count|pluralize }}<span class="device-dot"></span>5 Mbps each</span>
+              <span class="plan-select">Select package <b>→</b></span>
+            </button>
+            {% empty %}
+            <div class="loading-card">Packages are being set up. Please check back soon.</div>
+            {% endfor %}
+          </div>
+          <section class="restore-panel" aria-labelledby="restore-title">
+            <div class="checkout-topline"><span class="checkout-step">↻</span><span>MY PACKAGE</span></div>
+            <h2 id="restore-title">Check your package.</h2>
+            <p class="checkout-intro">Use the phone number and receipt from your M-Pesa message to check an active package and connect this device.</p>
+            <form id="reactivate-form" class="restore-form">
+              {% csrf_token %}
+              <label for="reactivate-phone">M-Pesa phone number</label>
+              <div class="phone-input-wrap"><span class="country-code">+254</span><input id="reactivate-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="7XX XXX XXX" required maxlength="13"></div>
+              <label for="reactivate-receipt" class="receipt-label">M-Pesa receipt code</label>
+              <input id="reactivate-receipt" class="receipt-input" type="text" autocomplete="off" placeholder="e.g. QGH7ABC123" required maxlength="12" autocapitalize="characters">
+              <button id="reactivate-button" class="pay-button" type="submit">Check package &amp; connect <span class="button-arrow">→</span></button>
+            </form>
+            <div id="reactivate-message" class="checkout-message" role="status" aria-live="polite"></div>
+            <div id="reactivate-credentials" class="access-credentials" hidden></div>
+            <div class="support-line">Need a hand? <a href="tel:{{ support_phone }}">Call {{ support_phone }}</a></div>
+          </section>
+        </div>
+
+        <dialog id="checkout-dialog" class="checkout-dialog" aria-labelledby="checkout-title">
+          <div class="checkout-card">
+          <button class="dialog-close" type="button" aria-label="Close payment dialog" onclick="this.closest('dialog').close()">×</button>
+          <div class="checkout-topline"><span class="checkout-step">01</span><span>YOUR CONNECTION</span></div>
+          <h2 id="checkout-title">Get online.</h2>
+          <p class="checkout-intro">Enter your M-Pesa number to pay. Your package starts when payment is confirmed.</p>
+          <div id="selection-summary" class="selection-summary empty">
+            <span class="summary-icon">⌁</span>
+            <span>Choose a package to see your order</span>
+          </div>
+          <form id="checkout-form">
+            {% csrf_token %}
+            <label for="phone">M-Pesa phone number</label>
+            <div class="phone-input-wrap"><span class="country-code">🇰🇪 +254</span><input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="7XX XXX XXX" required maxlength="13"></div>
+            <p class="field-hint">We’ll send a payment request to this number.</p>
+            <button id="pay-button" class="pay-button" type="submit" disabled>
+              <span class="mpesa-mark">M</span><span>Pay with M-Pesa</span><span class="button-arrow">→</span>
+            </button>
+          </form>
+          {% if not payments_enabled %}
+          <p class="payments-paused">M-Pesa payments are being set up. Please check back soon.</p>
+          {% endif %}
+          <div id="checkout-message" class="checkout-message" role="status" aria-live="polite"></div>
+          <div id="payment-receipt" class="payment-receipt" hidden></div>
+          <p class="recovery-hint">Keep the M-Pesa confirmation message in case you need help with your connection.</p>
+          <div class="support-line">Need a hand? <a href="tel:{{ support_phone }}">Call {{ support_phone }}</a></div>
+          </div>
+        </dialog>
+      </section>
+
+      <section class="how-it-works">
+        <div class="eyebrow dark"><span class="eyebrow-line"></span> THREE EASY STEPS</div>
+        <div class="steps-row">
+          <article class="step-card"><span class="step-number">01</span><div class="step-icon">▤</div><h3>Choose your package</h3><p>Find a time and device option that works for you.</p></article>
+          <article class="step-card"><span class="step-number">02</span><div class="step-icon">⌁</div><h3>Approve the prompt</h3><p>Enter your number and approve the M-Pesa request.</p></article>
+          <article class="step-card"><span class="step-number">03</span><div class="step-icon">↗</div><h3>You're online</h3><p>Your connection activates when payment is confirmed.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"><a class="brand footer-brand" href="/"><img class="brand-mark" src="{% static 'images/gatwy-mark.svg' %}" alt=""><span>GATWY<span class="brand-dot">.</span></span></a><span>Reliable Wi-Fi, right when you need it.</span><a href="tel:{{ support_phone }}">Support: {{ support_phone }}</a></footer>
+  </div>
+  {{ hotspot_login|json_script:"hotspot-login-config" }}
+  {{ portal_plans|json_script:"portal-plans-config" }}
+  <script src="{% static 'portal.js' %}?v=20261030" defer></script>
+</body>
+</html>
